@@ -9,7 +9,8 @@ conf_info_objects = get_conflation_info("../config.json")
 
 rule node_normalizer_is_ready:
     input:
-        "load_redis.done"
+        ["../comps/" + info['file'] for info in comp_info_objects],
+        ["../confs/" + info['file'] for info in conf_info_objects]
 
 for info in comp_info_objects:
     rule:
