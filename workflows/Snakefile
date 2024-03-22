@@ -1,0 +1,36 @@
+import os
+
+from expand_compendia_files import get_compendium_info, get_conflation_info
+
+os.environ["COMPENDIUM_URL"] = "https://stars.renci.org/var/babel_outputs/2023nov5/"
+
+comp_info_objects = get_compendium_info("../config.json")
+conf_info_objects = get_conflation_info("../config.json")
+
+rule node_normalizer_is_ready:
+    input:
+        "load_redis.done"
+
+for info in comp_info_objects:
+    rule:
+        name:
+            f"download_comp_{info['file']}"
+        params:
+            file_info_obj=info,
+            destination_path = "../comps/"
+        output:
+            f"../comps/{info['file']}"
+        script:
+            "download_compendia_files.py"
+
+for info in conf_info_objects:
+    rule:
+        name:
+            f"download_conf_{info['file']}"
+        params:
+            file_info_obj=info,
+            destination_path = "../confs/"
+        output:
+            f"../confs/{info['file']}"
+        script:
+            "download_compendia_files.py"

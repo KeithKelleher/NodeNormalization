@@ -7,25 +7,7 @@
     "data_files": [
         "AnatomicalEntity.txt",
         "Disease.txt",
-        "OrganismTaxon.txt",
-        "BiologicalProcess.txt",
-        "GeneFamily.txt",
-        "Pathway.txt",
-        "Cell.txt",
-        "Gene.txt",
-        "PhenotypicFeature.txt",
-        "CellularComponent.txt",
-        "GrossAnatomicalStructure.txt",
-        "Polypeptide.txt",
-        "ChemicalEntity.txt",
-        "MacromolecularComplexMixin.txt",
-        "Protein.txt",
-        "ChemicalMixture.txt",
-        "MolecularActivity.txt",
-        "SmallMolecule.txt",
-        "ComplexMolecularMixture.txt",
-        "MolecularMixture.txt",
-        "umls.txt"
+        "OrganismTaxon.txt"
     ],
     "test_mode": 0,
     "debug_messages": 0,
@@ -37,7 +19,7 @@
         },
         {
             "types": ["biolink:ChemicalEntity", "biolink:Drug"],
-            "file": "ChemicalEntityDrug.txt",
+            "file": "DrugChemical.txt",
             "redis_db": "chemical_drug_db"
         }
     ]
