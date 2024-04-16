@@ -10,6 +10,7 @@ import hashlib
 from itertools import combinations
 import jsonschema
 import os
+import glob
 from .redis_adapter import RedisConnectionFactory, RedisConnection
 from bmt import Toolkit
 from bmt.util import format as bmt_format
@@ -252,23 +253,24 @@ class NodeLoader:
                 # for each file validate and process
                 for comp in compendia:
                     # check the validity of the file
-                    if self.validate_compendia(comp):
-                        # try to load the file
-                        loaded = await self.load_compendium(comp, block_size)
-                        semantic_types_redis_pipeline = types_prefixes_redis.pipeline()
-                        # @TODO add meta data about files eg. checksum to this object
-                        semantic_types_redis_pipeline.set(f"file-{str(comp)}", json.dumps({"source_prefixes": self.source_prefixes}))
-                        if self._test_mode != 1:
-                            response = await RedisConnection.execute_pipeline(semantic_types_redis_pipeline)
-                            if asyncio.coroutines.iscoroutine(response):
-                                await response
-                        self.source_prefixes = {}
-                        if not loaded:
-                            logger.warning(f"Compendia file {comp} did not load.")
+                    for file_name in self.yield_actual_file_names(comp):
+                        if self.validate_compendia(file_name):
+                            # try to load the file
+                            loaded = await self.load_compendium(file_name, block_size)
+                            semantic_types_redis_pipeline = types_prefixes_redis.pipeline()
+                            # @TODO add meta data about files eg. checksum to this object
+                            semantic_types_redis_pipeline.set(f"file-{str(file_name)}", json.dumps({"source_prefixes": self.source_prefixes}))
+                            if self._test_mode != 1:
+                                response = await RedisConnection.execute_pipeline(semantic_types_redis_pipeline)
+                                if asyncio.coroutines.iscoroutine(response):
+                                    await response
+                            self.source_prefixes = {}
+                            if not loaded:
+                                logger.warning(f"Compendia file {file_name} did not load.")
+                                continue
+                        else:
+                            logger.warning(f"Compendia file {comp} is invalid.")
                             continue
-                    else:
-                        logger.warning(f"Compendia file {comp} is invalid.")
-                        continue
                 for conf in self._conflations:
                     loaded = await self.load_conflation(conf, block_size)
                     if not loaded:
@@ -335,6 +337,14 @@ class NodeLoader:
             response = await RedisConnection.execute_pipeline(types_prefixes_pipeline)
             if asyncio.coroutines.iscoroutine(response):
                 await response
+
+    def yield_actual_file_names(self, comp):
+        if os.path.isfile(comp):
+            yield comp
+        else:
+            pieces = glob.glob(f"{comp}.??")
+            for piece in pieces:
+                yield piece
 
     def validate_compendia(self, in_file):
         # open the file to validate
