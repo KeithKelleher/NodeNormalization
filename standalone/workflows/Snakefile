@@ -9,8 +9,8 @@ conf_info_objects = get_conflation_info("../config.json")
 
 rule node_normalizer_is_ready:
     input:
-        ["../comps/" + info['file'] for info in comp_info_objects],
-        ["../confs/" + info['file'] for info in conf_info_objects]
+        ["../../comps/" + info['file'] for info in comp_info_objects],
+        ["../../confs/" + info['file'] for info in conf_info_objects]
 
 for info in comp_info_objects:
     rule:
@@ -18,9 +18,9 @@ for info in comp_info_objects:
             f"download_comp_{info['file']}"
         params:
             file_info_obj=info,
-            destination_path = "../comps/"
+            destination_path = "../../comps/"
         output:
-            f"../comps/{info['file']}"
+            f"../../comps/{info['file']}"
         script:
             "download_compendia_files.py"
 
@@ -30,8 +30,8 @@ for info in conf_info_objects:
             f"download_conf_{info['file']}"
         params:
             file_info_obj=info,
-            destination_path = "../confs/"
+            destination_path = "../../confs/"
         output:
-            f"../confs/{info['file']}"
+            f"../../confs/{info['file']}"
         script:
             "download_compendia_files.py"

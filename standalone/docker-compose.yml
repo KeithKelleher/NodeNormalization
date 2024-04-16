@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  redis-database:
+    image: redis
+    container_name: redis_node_normalizer
+    ports:
+      - "6379:6379"
+    command:
+      ['redis-server','--appendonly', 'yes']
+    volumes:
+      - redis_data:/data
+
+  api-container:
+    container_name: api_node_normalizer
+    build:
+      context: ..
+      dockerfile: ./standalone/Dockerfile
+    ports:
+      - "2434:2434"
+    tty: true
+    volumes:
+      - ../comps:/app/NodeNormalization/comps
+      - ../confs:/app/NodeNormalization/confs
+    environment:
+      COMPENDIUM_URL: https://stars.renci.org/var/babel_outputs/2023nov5/
+    depends_on:
+      - redis-database
+
+volumes:
+  redis_data:
